@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-/* ---------- Clean markdown junk like **bold**, _italic_, `code` ---------- */
+
 function cleanText(text) {
   return text
     .replace(/\*\*(.*?)\*\*/g, "$1")
@@ -12,7 +12,6 @@ function cleanText(text) {
     .trim();
 }
 
-/* ---------- Parse AI feedback into readable sections ---------- */
 function parseFeedback(text) {
   const sections = {
     summary: "",

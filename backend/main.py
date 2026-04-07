@@ -9,7 +9,7 @@ import os
 
 app = FastAPI()
 
-# Allow frontend requests
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,10 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load embedding model once
+
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Setup LLM client
+
 load_dotenv(override=True)
 api_key = os.getenv("API_KEY")
 
@@ -30,7 +30,7 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
-# ----------- PDF TEXT EXTRACTION -----------
+
 def extract_text_from_pdf(file):
     text = ""
     with pdfplumber.open(file) as pdf:
@@ -39,12 +39,12 @@ def extract_text_from_pdf(file):
     return text
 
 
-# ----------- CLEAN TEXT -----------
+
 def clean_text(text):
     return text.lower().replace("\n", " ").strip()
 
 
-# ----------- ATS SCORE (FIXED) -----------
+
 def compute_similarity(resume, job):
     embeddings = model.encode([resume, job])
 
@@ -53,11 +53,11 @@ def compute_similarity(resume, job):
         [embeddings[1]]
     )[0][0]
 
-    # ✅ FIX: convert numpy -> python float
+    
     return float(round(score * 100, 2))
 
 
-# ----------- LLM FEEDBACK -----------
+
 def generate_feedback(resume, job):
 
     prompt = f"""
@@ -89,24 +89,23 @@ def generate_feedback(resume, job):
     return response.choices[0].message.content
 
 
-# ----------- API ENDPOINT -----------
 @app.post("/analyze")
 async def analyze(
     file: UploadFile = File(...),
     job: str = Form(...)
 ):
     try:
-        # Extract resume text
+        
         resume_text = extract_text_from_pdf(file.file)
 
-        # Clean text
+        
         resume_text = clean_text(resume_text)
         job_text = clean_text(job)
 
-        # Compute ATS score
+        
         score = compute_similarity(resume_text, job_text)
 
-        # Generate feedback
+        
         feedback = generate_feedback(resume_text, job_text)
 
         return {
